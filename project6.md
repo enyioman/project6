@@ -52,7 +52,6 @@ Check for available partitions:
 sudo lvmdiskscan 
 ```
 
-Use the pvcreate utility to mark each of 3 disks as physical volumes:
 
 Use the `pvcreate` utility to mark each of 3 disks as physical volumes:
 
@@ -239,6 +238,85 @@ sudo chown -R apache:apache /var/www/html/wordpress
 sudo chcon -t httpd_sys_rw_content_t /var/www/html/wordpress -R
 sudo setsebool -P httpd_can_network_connect=1
 ```
+
+
+## Installation of MySQL on DB Server
+
+Update the server and install MySql server:
+
+```
+sudo yum update
+sudo yum install mysql-server
+```
+
+Restart, enable and verify that MySQL is up and running by using this commands:
+
+```
+sudo systemctl restart mysqld
+sudo systemctl enable mysqld
+sudo systemctl status mysqld
+```
+
+Run the security script:
+
+```
+sudo mysql_secure_installation 
+```
+
+## Configuration of DB Server to work with WordPress on Web Server
+
+```
+sudo mysql
+```
+
+```
+CREATE DATABASE wordpress;
+CREATE USER `myuser`@`<Web-Server-Private-IP-Address>` IDENTIFIED BY 'mypass';
+GRANT ALL ON wordpress.* TO 'myuser'@'<Web-Server-Private-IP-Address>';
+FLUSH PRIVILEGES;
+SHOW DATABASES;
+exit
+```
+
+![DB up](./media/showdb.png)
+
+
+## Configure WordPress to connect to remote database
+
+To allow wordpress to connect to the database open MySQL port 3306 on DB Server EC2. For extra security, only allowed access to the DB server from the Web Server’s private IP address, so in the Inbound Rule configuration specify source as `<private ip address/32>`.
+
+![DB port](./media/addrule.png)
+
+
+Install MySQL client:
+
+```
+sudo mysql -u admin -p -h <DB-Server-Private-IP-address>
+```
+
+Execute SHOW DATABASES; command and see a list of existing databases:
+
+
+![DB port](./media/showdb.png)
+
+
+Check to see if the connection has been established and the databases can be viewed from the web server:
+
+
+![DB port](./media/dbaccess2.png)
+
+Set permissions so Apache can use Wordpress:
+
+```
+sudo chown -R apache:apache /var/www/html/
+sudo chcon -t httpd_sys_rw_content_t /var/www/html -R
+sudo setsebool -P httpd_can_network_connect=1
+```
+
+Enable TCP inbound traffic on the web server into port 80 from anywhere(0.0.0.0).
+
+
+The WordPress website can be accessed on the web server's public IP address.
 
 
 
