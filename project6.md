@@ -319,7 +319,7 @@ Enable TCP inbound traffic on the web server into port 80 from anywhere(0.0.0.0)
 The WordPress website can be accessed on the web server's public IP address.
 
 
-
+![Wordpress up](./media/wordup.png)
 
 
 
